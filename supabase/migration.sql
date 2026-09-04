@@ -183,6 +183,7 @@ DROP POLICY IF EXISTS "profiles_select" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_insert" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update" ON public.profiles;
 DROP POLICY IF EXISTS "bank_all" ON public.bank_settings;
+DROP POLICY IF EXISTS "bank_tenant_select" ON public.bank_settings;
 DROP POLICY IF EXISTS "rooms_owner" ON public.rooms;
 DROP POLICY IF EXISTS "rooms_tenant" ON public.rooms;
 DROP POLICY IF EXISTS "tenants_owner" ON public.tenants;
@@ -205,6 +206,14 @@ CREATE POLICY "profiles_select" ON public.profiles FOR SELECT USING (auth.uid() 
 CREATE POLICY "profiles_insert" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "bank_all" ON public.bank_settings FOR ALL USING (auth.uid() = owner_id);
+CREATE POLICY "bank_tenant_select" ON public.bank_settings FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.tenants
+        WHERE tenants.owner_id = bank_settings.owner_id
+          AND tenants.user_id = auth.uid()
+          AND tenants.is_active = TRUE
+    )
+);
 CREATE POLICY "rooms_owner" ON public.rooms FOR ALL USING (auth.uid() = owner_id);
 CREATE POLICY "rooms_tenant" ON public.rooms FOR SELECT USING (EXISTS (SELECT 1 FROM public.tenants WHERE tenants.room_id = rooms.id AND tenants.user_id = auth.uid() AND tenants.is_active = TRUE));
 CREATE POLICY "tenants_owner" ON public.tenants FOR ALL USING (auth.uid() = owner_id);

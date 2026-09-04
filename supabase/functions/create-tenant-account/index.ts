@@ -77,6 +77,17 @@ Deno.serve(async (request) => {
     .single()
   if (roomError || !room) return response({ error: 'Phòng không tồn tại hoặc không còn trống' }, 400)
 
+  const { data: activeTenant, error: activeTenantError } = await userClient
+    .from('tenants')
+    .select('id')
+    .eq('room_id', input.roomId)
+    .eq('owner_id', user.id)
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle()
+  if (activeTenantError) return response({ error: activeTenantError.message }, 400)
+  if (activeTenant) return response({ error: 'Phòng này đã có người thuê đang hoạt động' }, 400)
+
   const { data: authData, error: createUserError } = await adminClient.auth.admin.createUser({
     email: input.email,
     password: input.password,

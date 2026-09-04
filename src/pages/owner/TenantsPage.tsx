@@ -53,8 +53,11 @@ export function TenantsPage() {
   const vacantRooms = rooms.filter(r => r.status === 'vacant')
 
   const handleCreate = async () => {
-    if (!form.full_name || !form.phone || !form.room_id || !form.deposit) {
+    if (!form.full_name.trim() || !form.phone.trim() || !form.room_id || form.deposit === '') {
       return addToast('Vui lòng nhập đầy đủ thông tin', 'error')
+    }
+    if (!Number.isFinite(Number(form.deposit)) || Number(form.deposit) < 0) {
+      return addToast('Tiền cọc không hợp lệ', 'error')
     }
     setSaving(true)
     try {
