@@ -76,14 +76,14 @@ export function LoginPage() {
         <div className="glass-card rounded-3xl shadow-glass p-6 space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Số điện thoại"
-              type="tel"
-              placeholder="0912 345 678"
+              label="Số điện thoại hoặc email"
+              type="text"
+              placeholder="0912 345 678 hoặc email"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               leftIcon={<Phone className="w-4 h-4" />}
-              inputMode="tel"
-              autoComplete="tel"
+              inputMode="text"
+              autoComplete="username"
               required
             />
 
