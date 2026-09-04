@@ -53,13 +53,9 @@ FROM auth.users WHERE email = '0901234567@dh.local';
 
 ### 1.4 Tạo tài khoản người thuê
 
-Luồng owner tạo người thuê sử dụng Edge Function `create-tenant-account`. Deploy function sau khi đăng nhập Supabase CLI:
+Luồng owner tạo người thuê sử dụng Vercel Serverless Function tại `api/create-tenant-account.ts`. Vercel tự deploy function này cùng project.
 
-```bash
-npx supabase functions deploy create-tenant-account
-```
-
-Function dùng `SUPABASE_SERVICE_ROLE_KEY` ở server-side để gọi Auth Admin API; không đưa key này vào `.env` frontend hoặc bundle. RPC `create_tenant_account` cũ không còn được frontend sử dụng.
+Function dùng `SUPABASE_SERVICE_ROLE_KEY` ở server-side để gọi Auth Admin API; không đưa key này vào `.env` frontend hoặc bundle. Cấu hình biến này trong Vercel Project Settings, không thêm tiền tố `VITE_`. RPC `create_tenant_account` cũ không còn được frontend sử dụng.
 
 ### 1.5 Cấu hình Realtime
 Trong Supabase Dashboard → **Database** → **Replication**:

@@ -73,13 +73,16 @@ export const tenantService = {
     const { phone, fullName, roomId, deposit, startDate, password = '123456' } = params
     const email = phoneToEmail(phone)
 
-    // Auth admin operations must run in the server-side Edge Function.
-    const { data: rpcData, error: rpcError } = await supabase.functions.invoke('create-tenant-account', {
-      body: { email, password, fullName, phone, roomId, deposit, startDate },
+    // Auth admin operations run in the Vercel serverless API, never in the browser.
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) throw new Error('Phiên đăng nhập đã hết hạn')
+    const response = await fetch('/api/create-tenant-account', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, fullName, phone, roomId, deposit, startDate }),
     })
-
-    if (rpcError) throw new Error(rpcError.message)
-    if (!rpcData?.success) throw new Error(rpcData?.error ?? 'Không thể tạo tài khoản')
+    const rpcData = await response.json() as { success?: boolean; tenant_id?: string; error?: string }
+    if (!response.ok || !rpcData.success) throw new Error(rpcData.error ?? 'Không thể tạo tài khoản')
 
     // Fetch tenant vừa tạo
     const { data: tenant, error: fetchError } = await supabase
